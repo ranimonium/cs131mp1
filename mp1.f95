@@ -47,10 +47,9 @@ implicit none
 		! write contents of A_matrix
 		do row = 1,n
 !	   		do col = 1,n
-        		write(99,*) (A_matrix(row,col), col=1, "ES18.11", n)
+        		write(99, '(10ES30.10) ') ( A_matrix(row,col), col=1, n)
 !			end do
 		end do
-
 	PRINT *, A_matrix(1,3)
 
 	    deallocate(A_matrix)
