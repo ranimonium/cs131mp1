@@ -39,7 +39,7 @@ implicit none
 
 		! LET THE ALGO BEGIN
 
-!		call GJRM(A_matrix,n,0.0000000001)
+		call GJRM(A_matrix,n,0.0000000001)
 
 		! END OF ALGO
 
@@ -64,20 +64,23 @@ subroutine GJRM(A_matrix, n, e)
 
 	integer								::		n
 	real, dimension(n,n)				::		A_matrix
-    real								::		a_max, swappie
+    real								::		a_max, swappie, a_rowpivot
 	real								::		e
 	real								::		det
 	integer				 				::		row, col, pivot, temp, count			! i=row, j=col, pivot=k, r=temp,
-    integer, dimension(n)	::		p,	q		! permutation vectors.  p for places, q for swapping
-
+    integer, dimension(n)				::		p		! permutation vectors.  p for places, q for swapping
+    real, dimension(n)					::		q		! permutation vectors.  p for places, q for swapping
 
 ! initializations
 	det	=	1
 	do count=1,n
+    	print *,count
 		p(count)=count
+        q(count)=count
+        print *,'q(count)=',count
     end do
 
-
+	print *, 'q: ',q
 ! Gauss-Jordan reduction
 	do pivot=1,n
 
@@ -123,6 +126,7 @@ subroutine GJRM(A_matrix, n, e)
             det = (-1)*det  !because row interchange yields the negative of current det
 		end if
 
+	print *, 'q: ',q
 	! normalize pivot row
     	do col=1,n
         	A_matrix(pivot,col) = A_matrix(pivot,col)/a_max
@@ -131,17 +135,46 @@ subroutine GJRM(A_matrix, n, e)
         A_matrix(pivot, pivot) = 1.0/a_max !i don't get why
 		print *, "Akk=", A_matrix(pivot, pivot)
 
-        
+	! reduce pivot column to unit vector e
+    	do row=1, n
+        	if( row /= pivot ) then
+            	a_rowpivot = A_matrix(row,pivot)
+                do col=1,n
+					A_matrix(row,col) = A_matrix(row,col) - a_rowpivot*A_matrix(pivot,col)
+				end do
+            	A_matrix(row,pivot) = (-1)*(a_rowpivot/a_max)
+            end if	
+		end do
 	end do ! Gauss-Jordan reduction
 
-
+	print *, 'p: ',p
+	print *, 'q: ',q
+	! unscramble
+    	do row=1,n
+        	do col=1,n
+				print *,A_matrix(row,col)
+                count = p(col)
+                print *,'q(count): ', q(count)
+            	q(count) = A_matrix(row,col)
+                print *,'count: ', count
+                print *,'q(count): ', q(count)
+                print *,'p(col): ',p(col)
+            end do
+            print *,"BONGGA-sep!"
+            do col=1,n
+              	print *,A_matrix(row,col)
+				A_matrix(row,col) = q(col)
+            end do
+			print *,"BONGGA-endcol!"
+        end do
+        
 !print *, n
 
-!		do row = 1,n
-!	   		do col = 1,n
-!        		print *, A_matrix(row,col)
-!			end do
-!		end do
+		do row = 1,n
+	   		do col = 1,n
+        		print *, A_matrix(row,col)
+			end do
+		end do
 
 	
 
