@@ -1,34 +1,17 @@
 Davalos, Jadurani M.
 201118835
 
-This is to show how I input the matrices.  For example, to enter 2 matrices A and B of sizes 3 and 2 respectively
-A =
-[
-  1 2 3
-  4 5 6
-  7 8 9
- ]
-and 
-B = 
-[
-  11 12
-  21 22
-]
+Deliverables:
+* cs131mp1.f95
+* cs131mp1.exe
+* inputfile.txt
+* outputfile.txt
 
-We have the following input order:
-2 -> number of test matrices
-3 -> size of matrix; 3x3 matrix to follow
-1
-2
-3
-4
-5
-6
-7
-8
-9
-2 -> size of second matrix; 2x2 matrix to follow
-11
-12
-21
-22
+Flow:
+* Either run cs131mp1.exe or build and compile cs131mp1.f95
+* User will be prompted to enter filename of input file
+* User will be prompted to enter filename of output file
+* Program reads from file while not EOF
+* Program performs necessary computations for transformed matrix
+* Program computes for condition number based on 1-,F-,Infinity-norms
+* Specified results are writted to output file
