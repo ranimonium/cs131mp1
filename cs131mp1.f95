@@ -9,7 +9,7 @@ implicit none
 	! declare variables
 	real, allocatable, dimension(:,:)	::	A_matrix
 	integer					::	t=0		! tth matrix/case; just a counter
-	intege					::	n		! size of tth matrix
+	integer					::	n		! size of tth matrix
 	integer					::	row, col	! counters in reading contents for A_matrix
 	integer, allocatable, dimension(:)	::	p, q		! permutation vector.  p for rows, q for cols
 	real					::	det
@@ -51,7 +51,7 @@ implicit none
 		read(unit=10, fmt=*,  iostat=ierror) n
 	
 		if (ierror < 0) then
-        	print *,"END OF FILE"
+!        	print *,"END OF FILE"
 			exit readfile
 		end if
 
@@ -139,6 +139,9 @@ implicit none
 
     close(unit=10) ! close input file
     close(unit=99) ! close outputfile
+
+	print *, "Computation and write successful.  See ", outputfile
+    
 end program cs131mp1
 
 ! ++++++++++++++++++++++++++++++++ SBRTN GJRM ++++++++++++++++++++++++++++++++ !
@@ -179,7 +182,6 @@ implicit none
 			end do
 		end do
 	
-		print *, 'a_max=', a_max
 		! test for singularity
 	    	if ( abs(a_max) < e)  then
 			det = 0
@@ -349,5 +351,4 @@ implicit none
 	normInf=normInf
 return
 end function normInf
-
 
