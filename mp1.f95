@@ -36,6 +36,16 @@ implicit none
 !			end do
 		end do
     
+		
+        write(99, *) '****** Matrix ', t, ' ******'
+        
+		! write contents of A_matrix
+        write(99, *) 'a) input matrix'
+		do row = 1,n
+!	   		do col = 1,n
+        		write(99, '(10ES30.10) ') ( A_matrix(row,col), col=1, n)
+!			end do
+		end do
 
 		! LET THE ALGO BEGIN
 
@@ -44,13 +54,7 @@ implicit none
 		! END OF ALGO
 
 
-		! write contents of A_matrix
-		do row = 1,n
-!	   		do col = 1,n
-        		write(99, '(10ES30.10) ') ( A_matrix(row,col), col=1, n)
-!			end do
-		end do
-	PRINT *, A_matrix(1,3)
+
 
 	    deallocate(A_matrix)
 	write (99,*)'END OF MATRIX'
@@ -149,6 +153,9 @@ subroutine GJRM(A_matrix, n, e)
 
 	print *, 'p: ',p
 	print *, 'q: ',q
+
+	
+
 	! unscramble
     	do row=1,n
         	do col=1,n
