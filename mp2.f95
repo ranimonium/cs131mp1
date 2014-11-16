@@ -7,10 +7,10 @@ program cs131mp2
 implicit none
 
 ! declare variables
-	integer, parameter ::  ikind=selected_real_kind(p=18)
-	real (kind=ikind), dimension(4)	::	y_old, y_new  ! size 4 for the 4 equations
-	real (kind=ikind)	::	epsilon, h, period, t_max, t_inc, t_in
-	real (kind=ikind)	::	F
+
+	double precision, dimension(4)	::	y_old, y_new  ! size 4 for the 4 equations
+	double precision	::	epsilon, h, period, t_max, t_inc, t_in
+	double precision	::	F
 	integer	::	m
 	y_old = (/ 1.2, 0.0, 0.0, -1.049 /)
 
@@ -39,11 +39,9 @@ end program cs131mp2
 
 ! ++++++++++++++++++++++++++++++++ SBRTN RFK45 ++++++++++++++++++++++++++++++++ !
 subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
-
-   	integer, parameter ::  ikind=selected_real_kind(p=18)
-	real (kind=ikind), dimension(4)	::	y_old, y_new, y_dum, yhat_new, r, alpha_min_arr
-	real (kind=ikind), dimension(4,6)	::	k
-	real (kind=ikind)	::	t_in, t_out, h, epsilon, F, alpha
+double precision, dimension(4)	::	y_old, y_new, y_dum, yhat_new, r, alpha_min_arr
+	double precision, dimension(4,6)	::	k
+	double precision	::	t_in, t_out, h, epsilon, F, alpha, dum_elmin
     integer	::	m, p, n, ayos
 	
 
@@ -117,7 +115,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
 
 		
 		print *, "Y_OLD: ", y_old
-		print *, "Yhat_NEW: ", yhat_new
+		print *, "Yhat_NEW: ", yhathatw
 		print *, "Y_NEW: ", y_new
         print *, "I'M H: ", h
 ! SEE IF INTEGRATION STEP IS OK -> compute r and alpha
@@ -169,16 +167,15 @@ implicit none
 
 !declare variables
 	integer	::	p	!function number
-   	integer, parameter ::  ikind=selected_real_kind(p=18)
-	real (kind=ikind), dimension(4)	::	v	!contains y_old.  ignore t na lang; it ain't gonna be used anyway
-	real (kind=ikind)	::	F, a, b, p1, p2
+  t na lang; it ain't gonna be used anyway
+	double precision (k	F, a, b, p1, p2
 
 	a = 1/82.45
     b = 1 - a
     p1 = sqrt( ( (v(1) + a)**2 + (v(2))**2  )**3 )
     p2 = sqrt( ( (v(1) - b)**2 + (v(2))**2  )**3 )
 
-!	print *, "hello I'm v", v
+	pr	print *, "hello I'm v", v
 	select case (p)
 		case (1)
         	F = v(3)
