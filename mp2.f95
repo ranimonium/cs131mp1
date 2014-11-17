@@ -7,51 +7,33 @@ program cs131mp2
 implicit none
 
 ! declare variables
-	integer, parameter ::  ikind=selected_real_kind(p=18)
 	double precision, dimension(4)	::	y_old, y_new  ! size 4 for the 4 equations
 	double precision	::	epsilon, h, period, t_max, t_inc, t_in
 	double precision	::	F
-	integer	::	m
-	
-	y_old(1) = 1.2d0
-    y_old(2) = 0.0d0
-    y_old(3) = 0.0d0
-    y_old(4) = -1.049358d0
-    
-!	print *, y_old
+	integer	::	m, problem = -1 
 
 
-	period = 6.19216933
-	t_in = 0
-    t_max = period*2
-	t_inc = period/10
-	epsilon = 0.0000001d0
-    h = epsilon**(0.25)
-	m = 0
-
-
-	do while( t_in < t_max )
-		call RFK45(y_old, y_new, t_in, t_in + t_inc, epsilon, h, m, 4)
-		print *, "Y_NEW: ", y_new
-        print *, "M: ", m
-        m = 0
-		print *, "ITERATION ", t_in
+	do while( problem /= 0 )
+		print *, "Enter problem number (enter 0 to exit): "
+        read *, problem
+        iF(problem, problem < 0 .or. problem > 3) then
+			print *, "Invalid input puta"
+		else iF(problem, problem >= 1 .and. problem <= 3) then 
+			print *, "VALID YAY"
+		end if
     end do
-
-!	!print *, y
-!    !print *, "eq 2 or w", F(2, y)
-
+    
 end program cs131mp2
 
+! ++++++++++++++++++++++++++++++++ SBRTN INIT ++++++++++++++++++++++++++++++++ !
 
 ! ++++++++++++++++++++++++++++++++ SBRTN RFK45 ++++++++++++++++++++++++++++++++ !
-subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
+subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n, problem)
 
-   	integer, parameter ::  ikind=selected_real_kind(p=18)
 	double precision, dimension(4)	::	y_old, y_new, y_dum, yhat_new, r, alpha_min_arr
 	double precision, dimension(4,6)	::	k
 	double precision	::	t_in, t_out, h, epsilon, F, alpha
-    integer	::	m, p, n, ayos
+    integer	::	m, p, n, ayos, problem
 	
 
 	!print *, "I'm HERE!", epsilon		
@@ -59,13 +41,13 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
 	do while( t_in < t_out )
 
 		!print *, "T_IN ", t_in, " T_OUT ",t_out 
-		if(t_in + h > t_out) then
+		iF(problem, t_in + h > t_out) then
 			h = t_out - t_in
         end if
 
 ! for kp1
 		do p=1,n
-        	k(p,1) = F(p, y_old)
+        	k(p,1) = F(problem, p, y_old)
         end do
 		
 !for kp2
@@ -74,7 +56,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
         end do
 
 		do p=1,n
-			k(p,2) = F(p, y_dum)
+			k(p,2) = F(problem, p, y_dum)
         end do
 
 !for kp3
@@ -83,7 +65,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
         end do
 
 		do p=1,n
-			k(p,3) = F(p, y_dum)
+			k(p,3) = F(problem, p, y_dum)
         end do
 
 !for kp4
@@ -92,7 +74,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
         end do
         
 		do p=1,n
-			k(p,4) = F(p, y_dum)
+			k(p,4) = F(problem, p, y_dum)
         end do
 
 !for kp5
@@ -102,7 +84,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
         end do		
 
 		do p=1,n
-			k(p,5) = F(p, y_dum)
+			k(p,5) = F(problem, p, y_dum)
         end do
 
 !for kp6
@@ -112,7 +94,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
         end do
         
 		do p=1,n
-			k(p,6) = F(p, y_dum)
+			k(p,6) = F(problem, p, y_dum)
         end do
 
 ! computing y_new and yhat_new
@@ -161,7 +143,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
 
 
 		!print *, "OLD H!! ", h
-		if(alpha <= 0.1) then
+		iF(problem, alpha <= 0.1) then
 			h = 0.1*h
 		else if (alpha >= 4.0d0) then
 			h = 4.0d0*h
@@ -179,16 +161,19 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n)
 end subroutine RFK45
 
 
-function F(p, v)
+function F(problem, p, v)
 implicit none
 
 !declare variables
-	integer	::	p	!function number
-   	integer, parameter ::  ikind=selected_real_kind(p=18)
+	integer	::	p, problem	!function number and problem number
 	double precision, dimension(4)	::	v	!contains y_old.  ignore t na lang; it ain't gonna be used anyway
-	double precision	::	F, a, b, p1, p2
+	double precision	::	g, Vel
+    double precision	::	F, a, b, p1, p2
+    
+	g = 32.17d0
+    Vel = 160.0d0
 
-	a = 1/82.45
+	a = 1/82.45d0
     b = 1 - a
     p1 = sqrt( ( (v(1) + a)**2 + (v(2))**2  )**3 )
     p2 = sqrt( ( (v(1) - b)**2 + (v(2))**2  )**3 )
@@ -200,9 +185,9 @@ implicit none
 		case (2)
         	F = v(4)
 		case (3)
-        	F = 2 * v(4) + v(1) - b * ( v(1) + a)/p1 - a * (v(1) - b)/p2
+        	F = -( g/Vel ) * sqrt( v(3)**2 + v(4)**2 ) * v(3)
 		case (4)
-			F = -2 * v(3) + v(2) - b * v(2)/p1 - a * v(2)/p2
+			F = g - ( g/Vel ) * sqrt( v(3)**2 + v(4)**2 ) * v(4)
     end select
 
 	F=F
