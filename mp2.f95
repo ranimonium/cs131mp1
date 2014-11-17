@@ -8,25 +8,69 @@ implicit none
 
 ! declare variables
 	double precision, dimension(4)	::	y_old, y_new  ! size 4 for the 4 equations
-	double precision	::	epsilon, h, period, t_max, t_inc, t_in
+	double precision	::	epsilon, h, t_max, t_inc, t_in
 	double precision	::	F
 	integer	::	m, problem = -1 
-
 
 	do while( problem /= 0 )
 		print *, "Enter problem number (enter 0 to exit): "
         read *, problem
-        iF(problem, problem < 0 .or. problem > 3) then
+        if(problem < 0 .or. problem > 3) then
 			print *, "Invalid input puta"
-		else iF(problem, problem >= 1 .and. problem <= 3) then 
-			print *, "VALID YAY"
+		else if( problem >= 1 .and. problem <= 3) then 
+
+			call initialize(problem, y_old, epsilon, h, t_inc, t_max)
+            t_in = 0
+			do while( t_in < t_max )
+            	m = 0
+				call RFK45(y_old, y_new, t_in, t_in + t_inc, epsilon, h, m, 4, problem)
+				print *, "Y_NEW: ", y_new
+		        print *, "M: ", m		        
+				print *, "ITERATION ", t_in
+		    end do
+
 		end if
     end do
     
 end program cs131mp2
 
 ! ++++++++++++++++++++++++++++++++ SBRTN INIT ++++++++++++++++++++++++++++++++ !
+subroutine initialize(problem, y_old, epsilon, h, t_inc, t_max)
+implicit none
+	double precision, dimension(4)	::	y_old
+	double precision	::	epsilon, h, t_max, t_inc
+    integer	:: problem
 
+	select case(problem)
+		case(1)
+			y_old(1) = 0.0d0
+		    y_old(2) = 0.0d0
+		    y_old(3) = 440.0d0
+		    y_old(4) = 0.0d0
+            epsilon = 0.000001d0
+            t_inc = 1
+            t_max = 60
+        case(2)
+			y_old(1) = 1.2d0
+		    y_old(2) = 0.0d0
+		    y_old(3) = 0.0d0
+		    y_old(4) = -1.049358d0
+            epsilon = 0.0000001d0
+            t_inc = 6.19216933d0/10
+            t_max = 2*6.19216933d0
+        case(3)  
+			y_old(1) = 1.0d0 - 0.25d0
+		    y_old(2) = 0.0d0
+		    y_old(3) = 0.0d0
+		    y_old(4) = (3.14159265359d0 / 4) * sqrt( (1 + 0.25d0) / ( 1 - 0.25d0 ))
+            epsilon = 0.0000001d0
+            t_inc = 8.0d0/10  
+            t_max = 2*8.0d0
+    end select
+
+	h = epsilon**(0.25)
+    
+end subroutine initialize
 ! ++++++++++++++++++++++++++++++++ SBRTN RFK45 ++++++++++++++++++++++++++++++++ !
 subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n, problem)
 
@@ -41,7 +85,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n, problem)
 	do while( t_in < t_out )
 
 		!print *, "T_IN ", t_in, " T_OUT ",t_out 
-		iF(problem, t_in + h > t_out) then
+		if(t_in + h > t_out) then
 			h = t_out - t_in
         end if
 
@@ -105,11 +149,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n, problem)
             				& (28561.0d0/56430)*k(p,4) - (9.0d0/50)*k(p,5) + (2.0d0/55)*k(p,6) )
         end do
 
-		
-		!print *, "Y_OLD: ", y_old
-		!print *, "Yhat_NEW: ", yhat_new
-		!print *, "Y_NEW: ", y_new
-        !print *, "I'M H: ", h
+	
 ! SEE IF INTEGRATION STEP IS OK -> compute r and alpha
 		
 		do p=1,n
@@ -143,7 +183,7 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n, problem)
 
 
 		!print *, "OLD H!! ", h
-		iF(problem, alpha <= 0.1) then
+		if(alpha <= 0.1) then
 			h = 0.1*h
 		else if (alpha >= 4.0d0) then
 			h = 4.0d0*h
@@ -152,10 +192,6 @@ subroutine RFK45(y_old, y_new, t_in, t_out, epsilon, h, m, n, problem)
 		end if
 
 		m = m+1
-		!print *, "NEW H!! ", h
-        if (mod(m,25)==0) then
-			print *, "HERE I M!! ", m 
-		end if
     end do
 	
 end subroutine RFK45
@@ -169,6 +205,7 @@ implicit none
 	double precision, dimension(4)	::	v	!contains y_old.  ignore t na lang; it ain't gonna be used anyway
 	double precision	::	g, Vel
     double precision	::	F, a, b, p1, p2
+    double precision	::	a2
     
 	g = 32.17d0
     Vel = 160.0d0
@@ -178,18 +215,42 @@ implicit none
     p1 = sqrt( ( (v(1) + a)**2 + (v(2))**2  )**3 )
     p2 = sqrt( ( (v(1) - b)**2 + (v(2))**2  )**3 )
 
-!	!print *, "hello I'm v", v
-	select case (p)
-		case (1)
-        	F = v(3)
-		case (2)
-        	F = v(4)
-		case (3)
-        	F = -( g/Vel ) * sqrt( v(3)**2 + v(4)**2 ) * v(3)
-		case (4)
-			F = g - ( g/Vel ) * sqrt( v(3)**2 + v(4)**2 ) * v(4)
-    end select
-
+	a2 = 3.14159265359d0 / 4 
+   
+	if(problem == 1) then
+		select case (p)
+			case (1)
+        		F = v(3)
+			case (2)
+    	    	F = v(4)
+			case (3)
+	        	F = -( g/Vel**2 ) * sqrt( v(3)**2 + v(4)**2 ) * v(3)
+			case (4)
+				F = g - ( g/Vel**2 ) * sqrt( v(3)**2 + v(4)**2 ) * v(4)
+	    end select
+    else if (problem == 2) then
+			select case (p)
+				case (1)
+        			F = v(3)
+			case (2)
+    	    	F = v(4)
+			case (3)
+        		F = 2 * v(4) + v(1) - b * ( v(1) + a)/p1 - a * (v(1) - b)/p2
+			case (4)
+				F = -2 * v(3) + v(2) - b * v(2)/p1 - a * v(2)/p2
+	    end select
+	else 
+		select case (p)
+			case (1)
+        		F = v(1)
+			case (2)
+    	    	F = v(2)
+			case (3)
+        		F = - (a2**2)*v(1)/( v(1)**2 + v(2)**2  )**(1.5d0)
+			case (4)
+				F = - (a2**2)*v(2)/( v(1)**2 + v(2)**2  )**(1.5d0) 
+	    end select
+	end if
 	F=F
 return
 end function F
